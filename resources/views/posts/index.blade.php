@@ -3,7 +3,10 @@
 @section('content')
 <div class="d-flex justify-content-between mb-3">
     <h2>Post List</h2>
-    <a class="btn btn-primary" href="{{ route('posts.create') }}">Create Post</a>
+    <div>
+        <a class="btn btn-success" href="{{ route('posts.export') }}">Export CSV</a>
+        <a class="btn btn-primary" href="{{ route('posts.create') }}">Create Post</a>
+    </div>
 </div>
 @if (session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>

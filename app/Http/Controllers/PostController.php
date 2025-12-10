@@ -47,4 +47,38 @@ class PostController extends Controller
         $post->delete();
         return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
     }
+
+    public function export()
+    {
+        $posts = Post::all();
+        $timestamp = now()->format('Y-m-d_His');
+        $filename = "posts_export_{$timestamp}.csv";
+
+        return response()->streamDownload(function () use ($posts) {
+            // Open output stream
+            $handle = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Add CSV headers
+            fputcsv($handle, ['ID', 'Title', 'Content', 'Created At', 'Updated At']);
+
+            // Add data rows
+            foreach ($posts as $post) {
+                fputcsv($handle, [
+                    $post->id,
+                    $post->title,
+                    $post->content,
+                    optional($post->created_at)->format('d/m/Y H:i:s') ?? '',
+                    optional($post->updated_at)->format('d/m/Y H:i:s') ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ]);
+    }
 }
